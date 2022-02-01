@@ -1,7 +1,17 @@
+import { fileMeta } from './shared'
+
 export interface drawConfig {
-  background: HTMLImageElement
-  text: HTMLImageElement
-  logo: HTMLImageElement
-  scale: number
+  background?: {
+    image: HTMLImageElement
+    meta: fileMeta
+  }
+  text: {
+    image: HTMLImageElement
+    meta: fileMeta
+  }
+  logo?: {
+    image: HTMLImageElement
+    meta: fileMeta
+  }
   maskColor?: string
 }
