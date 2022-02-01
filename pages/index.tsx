@@ -96,7 +96,7 @@ const HomePage: NextPage = () => {
             >
               <Grid.Container gap={1} justify="center">
                 <Grid xs={6} md={4}>
-                  <Card css={defaultCardStyle}>
+                  <Card shadow={false} bordered css={defaultCardStyle}>
                     <Text h4>{homeLabels.sidebarTitle}</Text>
                     <Spacer y={2} />
                     <Text small>Background</Text>
