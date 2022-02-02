@@ -1,13 +1,28 @@
 import type { NextPage } from 'next'
-import Image from 'next/image'
+import * as NextImage from 'next/image'
 import styles from '../styles/Home.module.css'
-import { Card, CSS, Grid, Input, Link, Spacer, Switch, Text } from '@nextui-org/react'
+import {
+  Button,
+  Card,
+  CSS,
+  Grid,
+  Input,
+  Link,
+  Loading,
+  Spacer,
+  Switch,
+  Text,
+  useTheme,
+} from '@nextui-org/react'
 import { Container, Row, Col } from '@nextui-org/react'
 import { homeLabels } from '../libs/constants'
-import { fileMeta } from '../libs/model/shared'
+import { fileMeta, imageSize } from '../libs/model/shared'
 import ImageUploader from '../libs/Component/ImageUploader'
 import React from 'react'
 import HtmlHead from '../libs/Component/HtmlHead'
+import { getRandomAyat } from '../libs/utils/common'
+import { getRandomImageUrl, loadImg } from '../libs/utils/image'
+import { QuoteImage } from '../libs/utils/quoteImage'
 
 const defaultCardStyle: CSS = {
   borderRadius: 0,
@@ -16,7 +31,6 @@ const defaultCardStyle: CSS = {
 type quoteConfig = {
   openingText?: string
   primaryText: string
-  secondaryText?: string
   author?: string
   brandingText?: string
   brand?: {
@@ -56,12 +70,15 @@ const Header = () => {
 }
 
 const HomePage: NextPage = () => {
+  const [loading, setLoading] = React.useState(false)
   const [isBrandLogo, setIsBrandLogo] = React.useState(false)
   const [isCustomBg, setIsCustomBg] = React.useState(false)
+  const [layoutSize] = React.useState<imageSize>({ width: 1080, height: 1080 })
   const [formData, setFormData] = React.useState<quoteConfig>({ primaryText: '' })
+  const { theme } = useTheme()
 
   const setValueFormData = (
-    key: 'openingText' | 'primaryText' | 'secondaryText' | 'author' | 'brandingText',
+    key: 'openingText' | 'primaryText' | 'author' | 'brandingText',
     value: string
   ) => {
     const data = { ...formData }
@@ -77,6 +94,44 @@ const HomePage: NextPage = () => {
     const data = { ...formData }
     data[key] = { image, meta }
     setFormData(data)
+  }
+
+  const handleAutoGenerate = async () => {
+    setLoading(true)
+    try {
+      const [randomAyat, ayatNumber, surah] = await getRandomAyat()
+      const randomImageUrl = await getRandomImageUrl(layoutSize.width, layoutSize.height)
+      const [randomImage, randomImageSize] = await loadImg(randomImageUrl)
+
+      const author = `QS. ${surah} : ${ayatNumber}`
+      const openingText = "Allah subhanahu wa ta'ala berfirman: "
+      const quote = new QuoteImage(layoutSize.width, layoutSize.height, 1)
+      const [quoteText, quoteTextSize] = await quote.createTextImage({
+        mainText: randomAyat.idn,
+        author,
+        openingText,
+      })
+
+      quote.draw({
+        text: {
+          image: quoteText,
+          meta: { width: quoteTextSize.width, height: quoteTextSize.height },
+        },
+        background: { image: randomImage, meta: randomImageSize },
+      })
+
+      // store  date to local state
+      setFormData({
+        primaryText: randomAyat.idn,
+        openingText,
+        author,
+        randomImage,
+      })
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
   }
 
   return (
@@ -99,9 +154,11 @@ const HomePage: NextPage = () => {
                   <Card shadow={false} bordered css={defaultCardStyle}>
                     <Text h4>{homeLabels.sidebarTitle}</Text>
                     <Spacer y={2} />
-                    <Text small>Background</Text>
+                    <Text small>
+                      Background {isCustomBg ? ': Custom Image' : ': 🧚 Auto Generated Image'}
+                    </Text>
                     <Switch
-                      title="branding"
+                      title="background image"
                       checked={isCustomBg}
                       size="xl"
                       color="primary"
@@ -114,7 +171,7 @@ const HomePage: NextPage = () => {
                         onChange={(img, meta) => setImageFormData('background', img, meta)}
                       />
                     ) : (
-                      'Random Image'
+                      ''
                     )}
                     <Spacer y={2} />
                     <Input
@@ -128,19 +185,10 @@ const HomePage: NextPage = () => {
 
                     <Input
                       clearable
-                      labelPlaceholder="Primary Text"
+                      labelPlaceholder="Main Text"
                       color="primary"
                       value={formData.primaryText}
                       onChange={(e) => setValueFormData('primaryText', e.target.value)}
-                    />
-                    <Spacer y={2} />
-
-                    <Input
-                      clearable
-                      labelPlaceholder="Secondary Text"
-                      color="primary"
-                      value={formData.secondaryText}
-                      onChange={(e) => setValueFormData('secondaryText', e.target.value)}
                     />
                     <Spacer y={2} />
 
@@ -156,7 +204,6 @@ const HomePage: NextPage = () => {
                     <Text small>Brand</Text>
                     <Switch
                       title="branding"
-                      checked={isBrandLogo}
                       size="xl"
                       color="primary"
                       onChange={(e) => setIsBrandLogo(e.target.checked)}
@@ -177,6 +224,18 @@ const HomePage: NextPage = () => {
                       />
                     )}
                     <Spacer y={2} />
+                    <Button
+                      onClick={() => {
+                        console.log('buat..')
+                      }}
+                      shadow
+                    >
+                      Buat
+                    </Button>
+                    <Spacer y={1} />
+                    <Button onClick={handleAutoGenerate} flat shadow>
+                      {loading ? <Loading color="white" size="sm" /> : 'Buat Random Ayat'}
+                    </Button>
                     <Card.Footer>
                       <Link
                         color="primary"
@@ -190,7 +249,12 @@ const HomePage: NextPage = () => {
                 </Grid>
                 <Grid xs={6} md={8}>
                   <Card shadow={false} bordered css={defaultCardStyle}>
-                    2
+                    <canvas
+                      id="quote-canvas"
+                      width={layoutSize.width}
+                      height={layoutSize.height}
+                      style={{ background: theme?.colors.gray100.value }}
+                    ></canvas>
                   </Card>
                 </Grid>
               </Grid.Container>
@@ -215,7 +279,7 @@ const HomePage: NextPage = () => {
                 >
                   Powered by{' '}
                   <span className={styles.logo}>
-                    <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
+                    <NextImage.default src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
                   </span>
                 </a>
               </footer>

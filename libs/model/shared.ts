@@ -1,9 +1,14 @@
 export interface fileMeta {
-  filename: string
+  filename?: string
   width: number
   height: number
-  size: number
-  type: string
+  size?: number
+  type?: string
+}
+
+export interface imageSize {
+  width: number
+  height: number
 }
 
 export interface htmlHeadConfig {
