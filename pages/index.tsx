@@ -96,6 +96,13 @@ const HomePage: NextPage = () => {
     setFormData(data)
   }
 
+  const handleDownload = () => {
+    const link = document.createElement('a')
+    link.download = `quote_${Date.now()}.jpg`
+    link.href = (document.getElementById('quote-canvas') as HTMLCanvasElement).toDataURL()
+    link.click()
+  }
+
   const handleAutoGenerate = async () => {
     setLoading(true)
     try {
@@ -249,13 +256,8 @@ const HomePage: NextPage = () => {
                     )}
 
                     <Spacer y={2} />
-                    <Button
-                      onClick={() => {
-                        console.log('buat..')
-                      }}
-                      shadow
-                    >
-                      Buat
+                    <Button onClick={handleDownload} shadow>
+                      Download
                     </Button>
                     <Spacer y={1} />
                     <Button onClick={handleAutoGenerate} shadow color="warning">
