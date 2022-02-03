@@ -160,7 +160,10 @@ const HomePage: NextPage = () => {
                       title="background image"
                       checked={isCustomBg}
                       color="primary"
-                      onChange={(e) => setIsCustomBg(e.target.checked)}
+                      onChange={(e) => {
+                        setIsCustomBg(e.target.checked)
+                        setFormData({ ...formData, hasCustomBackground: e.target.checked })
+                      }}
                     />
                     <Spacer y={2} />
                     {isCustomBg ? (
@@ -271,11 +274,6 @@ const HomePage: NextPage = () => {
                       id="quote-canvas"
                       width={layoutSize.width}
                       height={layoutSize.height}
-                      // style={{
-                      //   backgroundColor: '#4158D0',
-                      //   backgroundImage:
-                      //     'linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)',
-                      // }}
                     ></canvas>
                   </Card>
                 </Grid>

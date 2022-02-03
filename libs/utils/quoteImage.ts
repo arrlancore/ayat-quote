@@ -49,6 +49,7 @@ export class QuoteImage {
 
   async preprocessDraw(quoteConfig: quoteConfig) {
     try {
+      // load image background
       let bgConfig: [HTMLImageElement, imageSize]
       if (quoteConfig.hasCustomBackground && quoteConfig.background) {
         const { width, height } = quoteConfig.background?.meta as fileMeta
@@ -59,19 +60,30 @@ export class QuoteImage {
         bgConfig = await this.createGradientBackground(colors, angle, this.width, this.height)
       }
 
+      // load image text
+      const txtConfig = await this.createTextImage({
+        mainText: quoteConfig.primaryText || '',
+        author: quoteConfig.author || '',
+        openingText: quoteConfig.openingText || '',
+      })
+
       const quoteCanvasConfig: quoteCanvasConfig = {
         background: {
           image: bgConfig[0],
           meta: bgConfig[1],
         },
         maskColorDark: quoteConfig.darkBackground,
+        text: {
+          image: txtConfig[0],
+          meta: txtConfig[1],
+        },
       }
 
       this.applyToCanvas(quoteCanvasConfig)
     } catch (error) {
       console.log('error:', error)
       if (error instanceof Error) {
-        console.log('error.message:', error, error.message)
+        console.log('error.message:', error.message)
       }
     }
   }
@@ -139,11 +151,9 @@ export class QuoteImage {
       <foreignObject x="0" y="0" width="${svgWidth}" height="${svgHeight}">
           <style>
           .source-text {
-            background: rgb(185, 77, 248);
+            background: rgb(100, 100, 100, 0.2);
             display: inline-block;
             padding: 1vw 2vw;
-            background: rgb(0,0,0);
-            background: linear-gradient(to bottom right, rgba(40, 40, 40, 0.5), rgba(0, 0, 0, 0.5));
             border-radius: 100px;
             font-family: ${font}, sans-serif;
             font-style: normal;
@@ -172,7 +182,6 @@ export class QuoteImage {
   </svg>`
     // Remove newlines and replace double quotes with single quotes
     const svgCodeEncoded = svgCode.replace(/\n/g, '').replace(/"/g, "'")
-    console.log(2, svgCodeEncoded)
 
     return loadImg(`data:image/svg+xml,${svgCodeEncoded}`)
   }
