@@ -4,6 +4,7 @@ import styles from '../styles/Home.module.css'
 import {
   Button,
   Card,
+  Checkbox,
   CSS,
   Grid,
   Input,
@@ -12,7 +13,7 @@ import {
   Spacer,
   Switch,
   Text,
-  useTheme,
+  // useTheme,
 } from '@nextui-org/react'
 import { Container, Row, Col } from '@nextui-org/react'
 import { homeLabels } from '../libs/constants'
@@ -23,25 +24,11 @@ import HtmlHead from '../libs/Component/HtmlHead'
 import { getRandomAyat } from '../libs/utils/common'
 import { getRandomImageUrl, loadImg } from '../libs/utils/image'
 import { QuoteImage } from '../libs/utils/quoteImage'
+import gradients from '../libs/utils/gradients'
+import { quoteConfig } from '../libs/model/quote'
 
 const defaultCardStyle: CSS = {
   borderRadius: 0,
-}
-
-type quoteConfig = {
-  openingText?: string
-  primaryText: string
-  author?: string
-  brandingText?: string
-  brand?: {
-    image?: HTMLImageElement
-    meta?: fileMeta
-  }
-  background?: {
-    image: HTMLImageElement
-    meta: fileMeta
-  }
-  randomImage?: HTMLImageElement
 }
 
 const Header = () => {
@@ -74,8 +61,20 @@ const HomePage: NextPage = () => {
   const [isBrandLogo, setIsBrandLogo] = React.useState(false)
   const [isCustomBg, setIsCustomBg] = React.useState(false)
   const [layoutSize] = React.useState<imageSize>({ width: 1080, height: 1080 })
-  const [formData, setFormData] = React.useState<quoteConfig>({ primaryText: '' })
-  const { theme } = useTheme()
+  const [formData, setFormData] = React.useState<quoteConfig>({
+    primaryText: '',
+    hasCustomBackground: true,
+    gradientColorIndex: 0,
+    darkBackground: true,
+  })
+  // const { theme } = useTheme()
+
+  console.log(formData)
+
+  React.useEffect(() => {
+    new QuoteImage(layoutSize.width, layoutSize.height, 1).preprocessDraw(formData)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData])
 
   const setValueFormData = (
     key: 'openingText' | 'primaryText' | 'author' | 'brandingText',
@@ -112,16 +111,18 @@ const HomePage: NextPage = () => {
         openingText,
       })
 
-      quote.draw({
+      quote.applyToCanvas({
         text: {
           image: quoteText,
           meta: { width: quoteTextSize.width, height: quoteTextSize.height },
         },
         background: { image: randomImage, meta: randomImageSize },
+        maskColorDark: formData.darkBackground,
       })
 
       // store  date to local state
       setFormData({
+        ...formData,
         primaryText: randomAyat.idn,
         openingText,
         author,
@@ -154,13 +155,10 @@ const HomePage: NextPage = () => {
                   <Card shadow={false} bordered css={defaultCardStyle}>
                     <Text h4>{homeLabels.sidebarTitle}</Text>
                     <Spacer y={2} />
-                    <Text small>
-                      Background {isCustomBg ? ': Custom Image' : ': 🧚 Auto Generated Image'}
-                    </Text>
+                    <Text small>Background {isCustomBg ? ': Custom Image' : ': Color'}</Text>
                     <Switch
                       title="background image"
                       checked={isCustomBg}
-                      size="xl"
                       color="primary"
                       onChange={(e) => setIsCustomBg(e.target.checked)}
                     />
@@ -171,8 +169,28 @@ const HomePage: NextPage = () => {
                         onChange={(img, meta) => setImageFormData('background', img, meta)}
                       />
                     ) : (
-                      ''
+                      <Grid.Container gap={1} justify="space-between">
+                        {gradients.map((style, idx) => (
+                          <Grid xs={4} md={2} key={`color${idx}`}>
+                            <Card
+                              color="gradient"
+                              css={{ cursor: 'pointer', width: 40, height: 40, ...style }}
+                              onClick={() => setFormData({ ...formData, gradientColorIndex: idx })}
+                            />
+                          </Grid>
+                        ))}
+                      </Grid.Container>
                     )}
+                    <Spacer y={2} />
+                    <Checkbox
+                      size="xs"
+                      checked={formData.darkBackground}
+                      onChange={(e) =>
+                        setFormData({ ...formData, darkBackground: e.target.checked })
+                      }
+                    >
+                      Dark Background
+                    </Checkbox>
                     <Spacer y={2} />
                     <Input
                       clearable
@@ -204,7 +222,6 @@ const HomePage: NextPage = () => {
                     <Text small>Brand</Text>
                     <Switch
                       title="branding"
-                      size="xl"
                       color="primary"
                       onChange={(e) => setIsBrandLogo(e.target.checked)}
                     />
@@ -223,6 +240,7 @@ const HomePage: NextPage = () => {
                         onChange={(e) => setValueFormData('brandingText', e.target.value)}
                       />
                     )}
+
                     <Spacer y={2} />
                     <Button
                       onClick={() => {
@@ -233,7 +251,7 @@ const HomePage: NextPage = () => {
                       Buat
                     </Button>
                     <Spacer y={1} />
-                    <Button onClick={handleAutoGenerate} flat shadow>
+                    <Button onClick={handleAutoGenerate} shadow color="warning">
                       {loading ? <Loading color="white" size="sm" /> : 'Buat Random Ayat'}
                     </Button>
                     <Card.Footer>
@@ -253,7 +271,11 @@ const HomePage: NextPage = () => {
                       id="quote-canvas"
                       width={layoutSize.width}
                       height={layoutSize.height}
-                      style={{ background: theme?.colors.gray100.value }}
+                      // style={{
+                      //   backgroundColor: '#4158D0',
+                      //   backgroundImage:
+                      //     'linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)',
+                      // }}
                     ></canvas>
                   </Card>
                 </Grid>

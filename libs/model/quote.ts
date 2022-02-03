@@ -1,11 +1,11 @@
 import { fileMeta, imageSize } from './shared'
 
-export interface drawConfig {
-  background?: {
+export interface quoteCanvasConfig {
+  background: {
     image: HTMLImageElement
     meta: fileMeta | imageSize
   }
-  text: {
+  text?: {
     image: HTMLImageElement
     meta: imageSize
   }
@@ -13,7 +13,26 @@ export interface drawConfig {
     image: HTMLImageElement
     meta: fileMeta
   }
-  maskColor?: string
+  maskColorDark: boolean
+}
+
+export interface quoteConfig {
+  openingText?: string
+  primaryText: string
+  author?: string
+  brandingText?: string
+  brand?: {
+    image?: HTMLImageElement
+    meta?: fileMeta
+  }
+  background?: {
+    image: HTMLImageElement
+    meta: fileMeta
+  }
+  randomImage?: HTMLImageElement
+  hasCustomBackground: boolean
+  gradientColorIndex: number
+  darkBackground: boolean
 }
 
 export interface textImage {

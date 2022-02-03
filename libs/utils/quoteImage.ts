@@ -1,5 +1,12 @@
-import { drawConfig, textImage } from '../model/quote'
+import { quoteCanvasConfig, quoteConfig, textImage } from '../model/quote'
+import { fileMeta, imageSize } from '../model/shared'
+import gradients from './gradients'
 import { loadImg } from './image'
+
+type colorGradientCanvas = {
+  color: string
+  stop: number
+}
 
 export class QuoteImage {
   width = 0
@@ -40,24 +47,55 @@ export class QuoteImage {
     return this.canvas.toDataURL()
   }
 
-  draw(config: drawConfig) {
+  async preprocessDraw(quoteConfig: quoteConfig) {
+    try {
+      let bgConfig: [HTMLImageElement, imageSize]
+      if (quoteConfig.hasCustomBackground && quoteConfig.background) {
+        const { width, height } = quoteConfig.background?.meta as fileMeta
+        bgConfig = [quoteConfig.background?.image as HTMLImageElement, { width, height }]
+      } else {
+        const gradient = gradients[quoteConfig.gradientColorIndex]
+        const { angle, colors } = this.toLinearData(gradient.backgroundImage)
+        bgConfig = await this.createGradientBackground(colors, angle, this.width, this.height)
+      }
+
+      const quoteCanvasConfig: quoteCanvasConfig = {
+        background: {
+          image: bgConfig[0],
+          meta: bgConfig[1],
+        },
+        maskColorDark: quoteConfig.darkBackground,
+      }
+
+      this.applyToCanvas(quoteCanvasConfig)
+    } catch (error) {
+      console.log('error:', error)
+      if (error instanceof Error) {
+        console.log('error.message:', error, error.message)
+      }
+    }
+  }
+
+  applyToCanvas(config: quoteCanvasConfig) {
     const context = this.getContext() as CanvasRenderingContext2D
 
     // clearing canvas
     context.clearRect(0, 0, this.width, this.height)
 
     // 1. draw a background
-    if (config.background?.image) {
-      context.drawImage(config.background.image, 0, 0)
-    }
+    context.drawImage(config.background.image, 0, 0)
     // 2. draw mask color
-    context.save()
-    context.fillStyle = config.maskColor || 'rgba(0, 0, 0, 0.6)'
-    context.fillRect(0, 0, this.width, this.height)
-    context.restore()
+    if (config.maskColorDark) {
+      context.save()
+      context.fillStyle = 'rgba(0, 0, 0, 0.6)'
+      context.fillRect(0, 0, this.width, this.height)
+      context.restore()
+    }
 
     // 3. draw image text latin
-    context.drawImage(config.text.image, 0, 0, this.layoutWidth, this.layoutHeight)
+    if (config.text?.image) {
+      context.drawImage(config.text.image, 0, 0, this.layoutWidth, this.layoutHeight)
+    }
 
     // 4. draw logo brand at bottom center
     if (config.logo?.image) {
@@ -76,6 +114,7 @@ export class QuoteImage {
       )
     }
   }
+
   async createTextImage(config: textImage, scale = 1) {
     const svgWidth = this.layoutWidth * scale
     const svgHeight = this.layoutHeight * scale
@@ -124,7 +163,7 @@ export class QuoteImage {
               height: ${svgHeight - downsideLayout}px;
               display: table-cell;
               font-style: italic;
-  p        }
+          }
           </style>
           <div xmlns="http://www.w3.org/1999/xhtml">
               ${textElement}
@@ -133,7 +172,61 @@ export class QuoteImage {
   </svg>`
     // Remove newlines and replace double quotes with single quotes
     const svgCodeEncoded = svgCode.replace(/\n/g, '').replace(/"/g, "'")
+    console.log(2, svgCodeEncoded)
 
     return loadImg(`data:image/svg+xml,${svgCodeEncoded}`)
+  }
+
+  private toLinearData(linearGradient: string): { angle: number; colors: colorGradientCanvas[] } {
+    const startIndex = linearGradient.search(/\(/) + 1
+    const arr = linearGradient.substring(startIndex, linearGradient.length - 1).split(',')
+    const angle = Number(arr[0].replace(/deg/, ''))
+    const colors = arr.splice(1).map((data) => {
+      const dataArr = data.split(' ').filter(Boolean)
+      return { color: dataArr[0], stop: Number(dataArr[1].replace(/%/, '')) }
+    })
+
+    return { angle, colors }
+  }
+
+  createGradientBackground(
+    // context: CanvasRenderingContext2D,
+    colors: colorGradientCanvas[],
+    angle: number,
+    width: number,
+    height: number
+  ) {
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D
+    const toFloat = (n: number) => {
+      const val = n / 100
+      return Math.round(val * 10) / 10
+    }
+    const length = width
+    const [x, y] = [0, 0]
+    const grd = context.createLinearGradient(
+      x,
+      y,
+      x + Math.cos(angle) * length,
+      y + Math.sin(angle) * length + width / 2
+    )
+
+    for (let i = 0; i < colors.length; i++) {
+      const data = colors[i]
+      grd.addColorStop(toFloat(data.stop), data.color)
+    }
+
+    // Fill with gradient
+    context.save()
+    context.fillStyle = grd
+    context.fillRect(0, 0, width, height)
+    context.restore()
+
+    const dataUrl = canvas.toDataURL()
+    canvas.remove()
+
+    return loadImg(dataUrl)
   }
 }
