@@ -31,6 +31,7 @@ export interface quoteConfig {
   }
   randomImage?: HTMLImageElement
   hasCustomBackground: boolean
+  hasCustomBrandImage: boolean
   gradientColorIndex: number
   darkBackground: boolean
 }

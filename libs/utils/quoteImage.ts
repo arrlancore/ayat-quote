@@ -13,6 +13,8 @@ export class QuoteImage {
   height = 0
   layoutWidth = 0
   layoutHeight = 0
+  fontFamily =
+    "-apple-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif"
   canvas: HTMLCanvasElement
   constructor(
     layoutWidth: number,
@@ -61,11 +63,22 @@ export class QuoteImage {
       }
 
       // load image text
-      const txtConfig = await this.createTextImage({
-        mainText: quoteConfig.primaryText || '',
-        author: quoteConfig.author || '',
-        openingText: quoteConfig.openingText || '',
-      })
+      const txtConfig = await this.createTextImage(
+        {
+          mainText: quoteConfig.primaryText || '',
+          author: quoteConfig.author || '',
+          openingText: quoteConfig.openingText || '',
+        },
+        2
+      )
+
+      // load image brand
+      let brandConfig: [HTMLImageElement, imageSize]
+      if (quoteConfig.hasCustomBrandImage && quoteConfig.brand?.image) {
+        brandConfig = [quoteConfig.brand.image, quoteConfig.brand.meta as fileMeta]
+      } else {
+        brandConfig = await this.createTextBrand(quoteConfig.brandingText || '', 2)
+      }
 
       const quoteCanvasConfig: quoteCanvasConfig = {
         background: {
@@ -76,6 +89,10 @@ export class QuoteImage {
         text: {
           image: txtConfig[0],
           meta: txtConfig[1],
+        },
+        logo: {
+          image: brandConfig[0],
+          meta: brandConfig[1],
         },
       }
 
@@ -132,12 +149,9 @@ export class QuoteImage {
     const svgHeight = this.layoutHeight * scale
     const downsideLayout = 40 * scale
 
-    const font =
-      "-apple-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif"
-
     const mainText = config.mainText ? `<p style="font-weight:bold">${config.mainText}</p>` : ''
     const sourceText = config.author ? `<p class="source-text">${config.author}</p>` : ''
-    const openingText = `<p><small style="text-decoration: underline; font-size: 2vw;">${config.openingText}</small></p>`
+    const openingText = `<p><small style="text-decoration: underline; font-size: 2.5vw;">${config.openingText}</small></p>`
 
     const textElement = `<div>
       ${openingText}
@@ -155,7 +169,7 @@ export class QuoteImage {
             display: inline-block;
             padding: 1vw 2vw;
             border-radius: 100px;
-            font-family: ${font}, sans-serif;
+            font-family: ${this.fontFamily}, sans-serif;
             font-style: normal;
             font-size: 3vw;
             border: 1vw solid white;
@@ -163,7 +177,7 @@ export class QuoteImage {
           div {
               margin:0;
               font-weight: normal;
-              font-family: ${font}, sans-serif;
+              font-family: ${this.fontFamily}, sans-serif;
               font-size: 4vw;
               line-height: 5vw;
               padding: 0vw 8vw 1vw;
@@ -180,6 +194,44 @@ export class QuoteImage {
           </div>
       </foreignObject>
   </svg>`
+    // Remove newlines and replace double quotes with single quotes
+    const svgCodeEncoded = svgCode.replace(/\n/g, '').replace(/"/g, "'")
+
+    return loadImg(`data:image/svg+xml,${svgCodeEncoded}`)
+  }
+
+  createTextBrand(txt: string, scale = 1) {
+    const svgWidth = this.width * scale
+    const svgHeight = this.height * scale
+    const downsideLayout = 40 * scale
+    const logoTxt = `<p>${txt}</p>`
+
+    const textElement = `<div>${logoTxt}</div>`
+
+    // Generate SVG code with JavaScript
+    // Note that we wrap the paragraph HTML in a <div>
+    const svgCode = `
+    <svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+        <foreignObject x="0" y="0" width="${svgWidth}" height="${svgHeight}">
+            <style>
+            p {
+                margin:0;
+                font-weight: normal;
+                font-family: ${this.fontFamily}, sans-serif;
+                font-size: 10vw;
+                color: white;
+                vertical-align: middle;
+                width: ${svgWidth - downsideLayout}px;
+                height: ${svgHeight - downsideLayout}px;
+                display: table-cell;
+                text-decoration: underline;
+            }
+            </style>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+                ${textElement}
+            </div>
+        </foreignObject>
+    </svg>`
     // Remove newlines and replace double quotes with single quotes
     const svgCodeEncoded = svgCode.replace(/\n/g, '').replace(/"/g, "'")
 

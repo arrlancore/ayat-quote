@@ -66,6 +66,7 @@ const HomePage: NextPage = () => {
     hasCustomBackground: true,
     gradientColorIndex: 0,
     darkBackground: true,
+    hasCustomBrandImage: false,
   })
   // const { theme } = useTheme()
 
@@ -226,7 +227,10 @@ const HomePage: NextPage = () => {
                     <Switch
                       title="branding"
                       color="primary"
-                      onChange={(e) => setIsBrandLogo(e.target.checked)}
+                      onChange={(e) => {
+                        setIsBrandLogo(e.target.checked)
+                        setFormData({ ...formData, hasCustomBrandImage: e.target.checked })
+                      }}
                     />
                     <Spacer y={2} />
                     {isBrandLogo ? (
