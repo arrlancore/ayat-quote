@@ -103,38 +103,17 @@ const HomePage: NextPage = () => {
     link.click()
   }
 
-  const handleAutoGenerate = async () => {
+  const generateAyat = async () => {
     setLoading(true)
     try {
       const [randomAyat, ayatNumber, surah] = await getRandomAyat()
-      const randomImageUrl = await getRandomImageUrl(layoutSize.width, layoutSize.height)
-      const [randomImage, randomImageSize] = await loadImg(randomImageUrl)
-
       const author = `QS. ${surah} : ${ayatNumber}`
       const openingText = "Allah subhanahu wa ta'ala berfirman: "
-      const quote = new QuoteImage(layoutSize.width, layoutSize.height, 1)
-      const [quoteText, quoteTextSize] = await quote.createTextImage({
-        mainText: randomAyat.idn,
-        author,
-        openingText,
-      })
-
-      quote.applyToCanvas({
-        text: {
-          image: quoteText,
-          meta: { width: quoteTextSize.width, height: quoteTextSize.height },
-        },
-        background: { image: randomImage, meta: randomImageSize },
-        maskColorDark: formData.darkBackground,
-      })
-
-      // store  date to local state
       setFormData({
         ...formData,
         primaryText: randomAyat.idn,
         openingText,
         author,
-        randomImage,
       })
       setLoading(false)
     } catch (error) {
@@ -260,7 +239,7 @@ const HomePage: NextPage = () => {
                       Download
                     </Button>
                     <Spacer y={1} />
-                    <Button onClick={handleAutoGenerate} shadow color="warning">
+                    <Button onClick={generateAyat} shadow color="warning">
                       {loading ? <Loading color="white" size="sm" /> : 'Buat Random Ayat'}
                     </Button>
                     <Card.Footer>
