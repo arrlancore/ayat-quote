@@ -27,7 +27,7 @@ import { fileMeta, imageSize } from '../libs/model/shared'
 import ImageUploader from '../libs/Component/ImageUploader'
 import React from 'react'
 import HtmlHead from '../libs/Component/HtmlHead'
-import { findMatch, getRandomAyat } from '../libs/utils/common'
+import { findMatch, generateCaptionIg, getRandomAyat } from '../libs/utils/common'
 import { getRandomImageUrl, loadImg } from '../libs/utils/image'
 import { QuoteImage } from '../libs/utils/quoteImage'
 import gradients from '../libs/utils/gradients'
@@ -129,6 +129,14 @@ const HomePage: NextPage = () => {
         author,
       })
       setLoading(false)
+      console.log(
+        await generateCaptionIg(
+          surah,
+          ayatNumber,
+          randomAyat,
+          (formData.brandingText || '').replace('@', '')
+        )
+      )
     } catch (error) {
       setLoading(false)
       console.log(error)

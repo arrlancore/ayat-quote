@@ -66,8 +66,7 @@ export async function generateCaptionIg(
   ayatNumber: number,
   ayatObj: ayatObj,
   account: string,
-  mainHashTag: string,
-  additionalHashtag: string
+  additionalHashtag = ''
 ) {
   const template = `
 
@@ -85,11 +84,11 @@ QS. ${surah} : ${ayatNumber}
 
 .
 
-Follow ${account}
+Follow @${account}
 
-Follow ${account}
+Follow @${account}
 
-Follow ${account}
+Follow @${account}
 
 .
 
@@ -97,7 +96,7 @@ Jangan lupa "LIKE" ❤️
 
 Dan TAG Sahabatmu 😊
 
-Hastag #${mainHashTag}
+Hastag #${account}
 
 ➖➖➖
 

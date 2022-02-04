@@ -3,7 +3,6 @@ import { quoteCanvasConfig, quoteConfig, textImage } from '../model/quote'
 import { fileMeta, imageSize } from '../model/shared'
 import gradients from './gradients'
 import { loadImg } from './image'
-import * as htmlToImage from 'html-to-image'
 
 type colorGradientCanvas = {
   color: string
