@@ -9,9 +9,13 @@ export interface quoteCanvasConfig {
     image: HTMLImageElement
     meta: imageSize
   }
-  logo?: {
-    image: HTMLImageElement
-    meta: fileMeta
+  logo: {
+    image?: HTMLImageElement
+    meta?: fileMeta
+  }
+  textLogo: {
+    image?: HTMLImageElement
+    meta?: fileMeta
   }
   maskColorDark: boolean
 }

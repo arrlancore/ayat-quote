@@ -3,6 +3,7 @@ import { quoteCanvasConfig, quoteConfig, textImage } from '../model/quote'
 import { fileMeta, imageSize } from '../model/shared'
 import gradients from './gradients'
 import { loadImg } from './image'
+import * as htmlToImage from 'html-to-image'
 
 type colorGradientCanvas = {
   color: string
@@ -85,11 +86,22 @@ export class QuoteImage {
       )
 
       // load image brand
-      let brandConfig: [HTMLImageElement, imageSize]
-      if (quoteConfig.hasCustomBrandImage && quoteConfig.brand?.image) {
-        brandConfig = [quoteConfig.brand.image, quoteConfig.brand.meta as fileMeta]
-      } else {
-        brandConfig = await this.createTextBrand(quoteConfig.brandingText || '', 2)
+      const logoConfig: { image: HTMLImageElement | undefined; meta: imageSize | undefined } = {
+        image: undefined,
+        meta: undefined,
+      }
+      const logoTextConfig: { image: HTMLImageElement | undefined; meta: imageSize | undefined } = {
+        image: undefined,
+        meta: undefined,
+      }
+      if (quoteConfig.brand?.image) {
+        logoConfig.image = quoteConfig.brand.image
+        logoConfig.meta = quoteConfig.brand.meta as fileMeta
+      }
+      if (quoteConfig.brandingText) {
+        const createdText = await this.createTextBrand(quoteConfig.brandingText || '')
+        logoTextConfig.image = createdText[0]
+        logoTextConfig.meta = createdText[1]
       }
 
       const quoteCanvasConfig: quoteCanvasConfig = {
@@ -103,8 +115,12 @@ export class QuoteImage {
           meta: txtConfig[1],
         },
         logo: {
-          image: brandConfig[0],
-          meta: brandConfig[1],
+          image: logoConfig.image,
+          meta: logoConfig.meta,
+        },
+        textLogo: {
+          image: logoTextConfig.image,
+          meta: logoTextConfig.meta,
         },
       }
 
@@ -140,19 +156,24 @@ export class QuoteImage {
 
     // 4. draw logo brand at bottom center
     if (config.logo?.image) {
+      const logoDimension = 42
       const halfLayout = this.layoutWidth / 2
-      const halfLogo = 240 / 2
+      const halfLogo = logoDimension / 2
       context.drawImage(
         config.logo.image,
         0,
         0,
-        config.logo.meta.width,
-        config.logo.meta.height,
+        config.logo.meta?.width || 0,
+        config.logo.meta?.height || 0,
         halfLayout - halfLogo,
-        this.layoutHeight - 200,
-        240,
-        240
+        this.layoutHeight - logoDimension * 2.5,
+        logoDimension,
+        logoDimension
       )
+    }
+    // 4. draw logo brand at bottom center
+    if (config.textLogo?.image) {
+      context.drawImage(config.textLogo.image, 0, this.height / 2 - 30)
     }
   }
 
@@ -212,14 +233,11 @@ export class QuoteImage {
     return loadImg(`data:image/svg+xml,${svgCodeEncoded}`)
   }
 
-  createTextBrand(txt: string, scale = 1) {
+  createTextBrand(txt: string, scale = 1): Promise<[HTMLImageElement, imageSize]> {
     const svgWidth = this.width * scale
     const svgHeight = this.height * scale
-    const downsideLayout = 40 * scale
+    const downsideLayout = 10 * scale
     const logoTxt = `<p>${txt}</p>`
-
-    const textElement = `<div>${logoTxt}</div>`
-
     // Generate SVG code with JavaScript
     // Note that we wrap the paragraph HTML in a <div>
     const svgCode = `
@@ -227,26 +245,24 @@ export class QuoteImage {
         <foreignObject x="0" y="0" width="${svgWidth}" height="${svgHeight}">
             <style>
             p {
-                margin:0;
-                font-weight: normal;
                 font-family: ${this.fontFamily}, sans-serif;
-                font-size: 10vw;
+                font-size: 2.5vw;
                 color: white;
                 vertical-align: middle;
                 width: ${svgWidth - downsideLayout}px;
                 height: ${svgHeight - downsideLayout}px;
                 display: table-cell;
                 text-decoration: underline;
+                text-align: center;
             }
             </style>
             <div xmlns="http://www.w3.org/1999/xhtml">
-                ${textElement}
+                ${logoTxt}
             </div>
         </foreignObject>
     </svg>`
     // Remove newlines and replace double quotes with single quotes
     const svgCodeEncoded = svgCode.replace(/\n/g, '').replace(/"/g, "'")
-
     return loadImg(`data:image/svg+xml,${svgCodeEncoded}`)
   }
 
