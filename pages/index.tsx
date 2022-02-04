@@ -314,7 +314,7 @@ const HomePage: NextPage = () => {
                       label={formData.brand?.meta?.filename || ''}
                       onChange={(img, meta) => setImageFormData('brand', img, meta)}
                     />
-                    <Spacer y={1} />
+                    <Spacer y={2} />
                     <Input
                       clearable
                       labelPlaceholder="Branding Text"
