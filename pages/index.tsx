@@ -19,7 +19,6 @@ import {
   Link,
   Loading,
   Spacer,
-  Switch,
   Text,
 } from '@nextui-org/react'
 import { Container, Row, Col } from '@nextui-org/react'
@@ -65,7 +64,6 @@ const Header = () => {
 
 const HomePage: NextPage = () => {
   const [loading, setLoading] = React.useState(false)
-  const [isBrandLogo, setIsBrandLogo] = React.useState(false)
   const [layoutSize] = React.useState<imageSize>({ width: 1080, height: 1080 })
   const [formData, setFormData] = React.useState<quoteConfig>({
     primaryText: '',
@@ -204,7 +202,10 @@ const HomePage: NextPage = () => {
               <Grid.Container gap={1} justify="center">
                 <Grid xs={6} md={4}>
                   <Card shadow={false} bordered css={defaultCardStyle}>
-                    <Text h4>{homeLabels.sidebarTitle}</Text>
+                    <Text h3>{homeLabels.sidebarTitle}</Text>
+                    <Spacer y={2} />
+
+                    <Text h4>{'Background'}</Text>
                     <Spacer y={2} />
                     <Button.Group css={{ width: '100%', margin: 0 }} color="primary">
                       <Button
@@ -268,6 +269,8 @@ const HomePage: NextPage = () => {
                       Dark Background
                     </Checkbox>
                     <Spacer y={2} />
+                    <Text h4>{'Text'}</Text>
+                    <Spacer y={2} />
                     <Input
                       clearable
                       labelPlaceholder="Opening Text"
@@ -295,30 +298,22 @@ const HomePage: NextPage = () => {
                     />
                     <Spacer y={2} />
 
-                    <Text small>Brand</Text>
-                    <Switch
-                      title="branding"
-                      color="primary"
-                      onChange={(e) => {
-                        setIsBrandLogo(e.target.checked)
-                        setFormData({ ...formData, hasCustomBrandImage: e.target.checked })
-                      }}
-                    />
+                    <Text h4>{'Brands'}</Text>
                     <Spacer y={2} />
-                    {isBrandLogo ? (
-                      <ImageUploader
-                        label={formData.brand?.meta?.filename || ''}
-                        onChange={(img, meta) => setImageFormData('brand', img, meta)}
-                      />
-                    ) : (
-                      <Input
-                        clearable
-                        labelPlaceholder="Branding Text"
-                        color="primary"
-                        value={formData.brandingText}
-                        onChange={(e) => setValueFormData('brandingText', e.target.value)}
-                      />
-                    )}
+                    <Text small>Branding Logo</Text>
+                    <Spacer y={1} />
+                    <ImageUploader
+                      label={formData.brand?.meta?.filename || ''}
+                      onChange={(img, meta) => setImageFormData('brand', img, meta)}
+                    />
+                    <Spacer y={1} />
+                    <Input
+                      clearable
+                      labelPlaceholder="Branding Text"
+                      color="primary"
+                      value={formData.brandingText}
+                      onChange={(e) => setValueFormData('brandingText', e.target.value)}
+                    />
 
                     <Spacer y={2} />
                     <Button onClick={handleDownload} shadow>
