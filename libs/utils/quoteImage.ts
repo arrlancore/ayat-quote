@@ -1,3 +1,4 @@
+import { quoteBackgroundTypes } from '../constants'
 import { quoteCanvasConfig, quoteConfig, textImage } from '../model/quote'
 import { fileMeta, imageSize } from '../model/shared'
 import gradients from './gradients'
@@ -38,10 +39,10 @@ export class QuoteImage {
     this.canvas.width = this.width
     this.canvas.height = this.height
     // avoid right click on canvas
-    this.canvas.oncontextmenu = function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
+    // this.canvas.oncontextmenu = function (e) {
+    //   e.preventDefault()
+    //   e.stopPropagation()
+    // }
     return this.canvas.getContext('2d')
   }
 
@@ -53,9 +54,20 @@ export class QuoteImage {
     try {
       // load image background
       let bgConfig: [HTMLImageElement, imageSize]
-      if (quoteConfig.hasCustomBackground && quoteConfig.background) {
+      if (
+        quoteConfig.backgroundType === quoteBackgroundTypes.CUSTOM_IMAGE &&
+        quoteConfig.background
+      ) {
         const { width, height } = quoteConfig.background?.meta as fileMeta
         bgConfig = [quoteConfig.background?.image as HTMLImageElement, { width, height }]
+      } else if (
+        quoteConfig.backgroundType === quoteBackgroundTypes.RANDOM_IMAGE &&
+        quoteConfig.randomImage
+      ) {
+        bgConfig = [
+          quoteConfig.randomImage as HTMLImageElement,
+          { width: this.width, height: this.height },
+        ]
       } else {
         const gradient = gradients[quoteConfig.gradientColorIndex]
         const { angle, colors } = this.toLinearData(gradient.backgroundImage)

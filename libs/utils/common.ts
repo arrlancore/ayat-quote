@@ -2,6 +2,48 @@ export function randomIntFromInterval(max: number, min = 1) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+export function downloadBlob(blob: Blob, name = 'quotes.jpg') {
+  // For other browsers:
+  // Create a link pointing to the ObjectURL containing the blob.
+  const data = window.URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = data
+  link.download = name
+
+  // this is necessary as link.click() does not work on the latest firefox
+  link.dispatchEvent(
+    new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    })
+  )
+
+  setTimeout(() => {
+    // For Firefox it is necessary to delay revoking the ObjectURL
+    window.URL.revokeObjectURL(data)
+    link.remove()
+  }, 100)
+}
+
+interface MatchCallback {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (): any
+}
+
+export function findMatch<T>(data: T, options: { option: T; callback: MatchCallback }[]) {
+  let result: unknown = null
+
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].option === data) {
+      result = options[i].callback()
+    }
+  }
+
+  return result
+}
+
 type ayatObj = {
   id: string
   idn: string

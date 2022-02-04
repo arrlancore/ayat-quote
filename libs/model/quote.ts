@@ -16,6 +16,8 @@ export interface quoteCanvasConfig {
   maskColorDark: boolean
 }
 
+export type BackgroundType = 'Color' | 'CustomImage' | 'RandomImage'
+
 export interface quoteConfig {
   openingText?: string
   primaryText: string
@@ -30,10 +32,10 @@ export interface quoteConfig {
     meta: fileMeta
   }
   randomImage?: HTMLImageElement
-  hasCustomBackground: boolean
   hasCustomBrandImage: boolean
   gradientColorIndex: number
   darkBackground: boolean
+  backgroundType: BackgroundType
 }
 
 export interface textImage {
