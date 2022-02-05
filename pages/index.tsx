@@ -1,6 +1,6 @@
 /**
  * @todo
- * - allow text and logo brand [ ]
+ * - allow text and logo brand [x]
  * - layout option [ ]
  * - react color picker [ ]
  */
@@ -18,11 +18,12 @@ import {
   Input,
   Link,
   Loading,
+  Radio,
   Spacer,
   Text,
 } from '@nextui-org/react'
 import { Container, Row, Col } from '@nextui-org/react'
-import { homeLabels, quoteBackgroundTypes } from '../libs/constants'
+import { homeLabels, layoutSizes, quoteBackgroundTypes } from '../libs/constants'
 import { fileMeta, imageSize } from '../libs/model/shared'
 import ImageUploader from '../libs/Component/ImageUploader'
 import React from 'react'
@@ -64,7 +65,7 @@ const Header = () => {
 
 const HomePage: NextPage = () => {
   const [loading, setLoading] = React.useState(false)
-  const [layoutSize] = React.useState<imageSize>({ width: 1080, height: 1080 })
+  const [layoutSize, setLayoutSize] = React.useState<imageSize>(layoutSizes[0])
   const [formData, setFormData] = React.useState<quoteConfig>({
     primaryText: '',
     gradientColorIndex: 0,
@@ -78,7 +79,7 @@ const HomePage: NextPage = () => {
   React.useEffect(() => {
     new QuoteImage(layoutSize.width, layoutSize.height, 1).preprocessDraw(formData)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData])
+  }, [formData, layoutSize])
 
   const setValueFormData = (
     key: 'openingText' | 'primaryText' | 'author' | 'brandingText',
@@ -213,7 +214,29 @@ const HomePage: NextPage = () => {
                     <Text h3>{homeLabels.sidebarTitle}</Text>
                     <Spacer y={2} />
 
-                    <Text h4>{'Background'}</Text>
+                    <Text h4>{homeLabels.sidebarLayout}</Text>
+                    <Spacer y={1} />
+                    <Radio.Group row value="primary">
+                      {layoutSizes.map(({ width, height }, idx) => {
+                        return (
+                          <Radio
+                            key={idx}
+                            size="sm"
+                            value={idx}
+                            color="primary"
+                            onChange={() => setLayoutSize(layoutSizes[idx])}
+                            checked={
+                              `${width}:${height}` === `${layoutSize.width}:${layoutSize.height}`
+                            }
+                          >
+                            {`${width}x${height}px`}
+                          </Radio>
+                        )
+                      })}
+                    </Radio.Group>
+                    <Spacer y={2} />
+
+                    <Text h4>{homeLabels.sidebarBackground}</Text>
                     <Spacer y={2} />
                     <Button.Group css={{ width: '100%', margin: 0 }} color="primary">
                       <Button
@@ -277,7 +300,7 @@ const HomePage: NextPage = () => {
                       Dark Background
                     </Checkbox>
                     <Spacer y={2} />
-                    <Text h4>{'Text'}</Text>
+                    <Text h4>{homeLabels.sidebarText}</Text>
                     <Spacer y={2} />
                     <Input
                       clearable
@@ -304,9 +327,13 @@ const HomePage: NextPage = () => {
                       value={formData.author}
                       onChange={(e) => setValueFormData('author', e.target.value)}
                     />
+                    <Spacer y={1} />
+                    <Button onClick={generateAyat} shadow color="secondary">
+                      {loading ? <Loading color="white" size="sm" /> : 'Buat Random Ayat'}
+                    </Button>
                     <Spacer y={2} />
 
-                    <Text h4>{'Brands'}</Text>
+                    <Text h4>{homeLabels.sidebarBrands}</Text>
                     <Spacer y={2} />
                     <Text small>Branding Logo</Text>
                     <Spacer y={1} />
@@ -322,15 +349,6 @@ const HomePage: NextPage = () => {
                       value={formData.brandingText}
                       onChange={(e) => setValueFormData('brandingText', e.target.value)}
                     />
-
-                    <Spacer y={2} />
-                    <Button onClick={handleDownload} shadow>
-                      Download
-                    </Button>
-                    <Spacer y={1} />
-                    <Button onClick={generateAyat} shadow color="secondary">
-                      {loading ? <Loading color="white" size="sm" /> : 'Buat Random Ayat'}
-                    </Button>
                     <Card.Footer>
                       <Link
                         color="primary"
