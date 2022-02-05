@@ -9,6 +9,8 @@ export const homeLabels = {
   sidebarBackground: 'Background',
   sidebarText: 'Text',
   sidebarBrands: 'Brands',
+  buttonCreateRandomAyat: 'Buat Random Ayat',
+  buttonGetRandomImage: 'Dapatkan Gambar',
 }
 
 export const quoteBackgroundTypes = {

@@ -1,13 +1,12 @@
 /**
  * @todo
  * - allow text and logo brand [x]
- * - layout option [ ]
+ * - layout option [x]
  * - react color picker [ ]
  */
 
 import type { NextPage } from 'next'
 import * as NextImage from 'next/image'
-import * as htmlToImage from 'html-to-image'
 import styles from '../styles/Home.module.css'
 import {
   Button,
@@ -74,8 +73,6 @@ const HomePage: NextPage = () => {
     backgroundType: quoteBackgroundTypes.COLOR,
   })
 
-  console.log(formData)
-
   React.useEffect(() => {
     new QuoteImage(layoutSize.width, layoutSize.height, 1).preprocessDraw(formData)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,23 +95,6 @@ const HomePage: NextPage = () => {
     const data = { ...formData }
     data[key] = { image, meta }
     setFormData(data)
-  }
-
-  const handleDownload = () => {
-    const node = document.getElementById('quote-canvas')
-    if (node) {
-      htmlToImage
-        .toJpeg(node)
-        .then(function (dataUrl) {
-          const link = document.createElement('a')
-          link.download = `quote_${Date.now()}.jpg`
-          link.href = dataUrl || ''
-          link.click()
-        })
-        .catch(function (error) {
-          console.error('oops, something went wrong!', error)
-        })
-    }
   }
 
   const generateAyat = async () => {
@@ -186,8 +166,8 @@ const HomePage: NextPage = () => {
     {
       option: 'Random Image',
       callback: () => (
-        <Button onClick={getRandomImage} bordered color="default" css={{ width: 100 }}>
-          {loading ? <Loading color="white" size="sm" /> : 'Buat Random Image'}
+        <Button onClick={getRandomImage} css={{ width: 100 }}>
+          {loading ? <Loading color="white" size="sm" /> : homeLabels.buttonGetRandomImage}
         </Button>
       ),
     },
@@ -328,8 +308,12 @@ const HomePage: NextPage = () => {
                       onChange={(e) => setValueFormData('author', e.target.value)}
                     />
                     <Spacer y={1} />
-                    <Button onClick={generateAyat} shadow color="secondary">
-                      {loading ? <Loading color="white" size="sm" /> : 'Buat Random Ayat'}
+                    <Button onClick={generateAyat} shadow>
+                      {loading ? (
+                        <Loading color="white" size="sm" />
+                      ) : (
+                        homeLabels.buttonCreateRandomAyat
+                      )}
                     </Button>
                     <Spacer y={2} />
 
