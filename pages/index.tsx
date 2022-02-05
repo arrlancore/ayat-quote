@@ -41,7 +41,7 @@ const Header = () => {
   return (
     <header style={{ width: '100%', height: 80, background: 'black' }}>
       <Container gap={0}>
-        <Row gap={1}>
+        <Row gap={0}>
           <Col>
             <Text
               h1
@@ -66,11 +66,15 @@ const HomePage: NextPage = () => {
   const [loading, setLoading] = React.useState(false)
   const [layoutSize, setLayoutSize] = React.useState<imageSize>(layoutSizes[0])
   const [formData, setFormData] = React.useState<quoteConfig>({
-    primaryText: '',
+    // initial data
+    primaryText: 'Tali yang paling kuat untuk tempat bergantung adalah tali pertolongan Allah',
     gradientColorIndex: 0,
     darkBackground: true,
     hasCustomBrandImage: false,
     backgroundType: quoteBackgroundTypes.COLOR,
+    author: '~ Buya Hamka',
+    brandingText: 'NaisQuotes',
+    openingText: 'Bismillah',
   })
 
   React.useEffect(() => {
@@ -179,7 +183,7 @@ const HomePage: NextPage = () => {
       <Header />
       <Spacer y={1} />
       <Container gap={0} id="container">
-        <Row gap={1}>
+        <Row gap={0}>
           <Col>
             <Card
               shadow={false}
@@ -189,7 +193,16 @@ const HomePage: NextPage = () => {
               }}
             >
               <Grid.Container gap={1} justify="center">
-                <Grid xs={6} md={4}>
+                <Grid xs={12} lg={6}>
+                  <Card shadow={false} bordered css={defaultCardStyle}>
+                    <canvas
+                      id="quote-canvas"
+                      width={layoutSize.width}
+                      height={layoutSize.height}
+                    ></canvas>
+                  </Card>
+                </Grid>
+                <Grid xs={12} lg={6}>
                   <Card shadow={false} bordered css={defaultCardStyle}>
                     <Text h3>{homeLabels.sidebarTitle}</Text>
                     <Spacer y={2} />
@@ -218,7 +231,7 @@ const HomePage: NextPage = () => {
 
                     <Text h4>{homeLabels.sidebarBackground}</Text>
                     <Spacer y={2} />
-                    <Button.Group css={{ width: '100%', margin: 0 }} color="primary">
+                    <Button.Group ghost css={{ width: '100%', margin: 0 }} color="primary">
                       <Button
                         onClick={() =>
                           setFormData({ ...formData, backgroundType: quoteBackgroundTypes.COLOR })
@@ -334,23 +347,10 @@ const HomePage: NextPage = () => {
                       onChange={(e) => setValueFormData('brandingText', e.target.value)}
                     />
                     <Card.Footer>
-                      <Link
-                        color="primary"
-                        target="_blank"
-                        href="https://github.com/nextui-org/nextui"
-                      >
-                        Baca tutorial lengkapnya..
+                      <Link color="primary" target="_blank" href="#">
+                        Untuk menyimpan gambar, klik kanan pada gambar lalu pilih save / simpan
                       </Link>
                     </Card.Footer>
-                  </Card>
-                </Grid>
-                <Grid xs={6} md={8}>
-                  <Card shadow={false} bordered css={defaultCardStyle}>
-                    <canvas
-                      id="quote-canvas"
-                      width={layoutSize.width}
-                      height={layoutSize.height}
-                    ></canvas>
                   </Card>
                 </Grid>
               </Grid.Container>
