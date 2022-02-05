@@ -212,7 +212,7 @@ const HomePage: NextPage = () => {
 
                     <Text h4>{homeLabels.sidebarLayout}</Text>
                     <Spacer y={1} />
-                    <Radio.Group row value="primary">
+                    <Radio.Group row defaultValue={0}>
                       {layoutSizes.map(({ width, height }, idx) => {
                         return (
                           <Radio
@@ -222,7 +222,7 @@ const HomePage: NextPage = () => {
                             color="primary"
                             onChange={() => setLayoutSize(layoutSizes[idx])}
                             checked={
-                              `${width}:${height}` === `${layoutSize.width}:${layoutSize.height}`
+                              `${width}:${height}` == `${layoutSize.width}:${layoutSize.height}`
                             }
                           >
                             {`${width}x${height}px`}
