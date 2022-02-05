@@ -31,7 +31,7 @@ import { findMatch, generateCaptionIg, getRandomAyat } from '../libs/utils/commo
 import { getRandomImageUrl, loadImg } from '../libs/utils/image'
 import { QuoteImage } from '../libs/utils/quoteImage'
 import gradients from '../libs/utils/gradients'
-import { quoteConfig } from '../libs/model/quote'
+import { BackgroundType, quoteConfig } from '../libs/model/quote'
 
 const defaultCardStyle: CSS = {
   borderRadius: 0,
@@ -177,6 +177,9 @@ const HomePage: NextPage = () => {
     },
   ])
 
+  const checkActiveBackground = (currentValue: BackgroundType, acc: BackgroundType) =>
+    currentValue == acc ? { textDecoration: 'underline' } : { textDecoration: 'normal' }
+
   return (
     <>
       <HtmlHead title={homeLabels.pageTitle} description={homeLabels.pageDescription} />
@@ -193,7 +196,7 @@ const HomePage: NextPage = () => {
               }}
             >
               <Grid.Container gap={1} justify="center">
-                <Grid xs={12} lg={6}>
+                <Grid xs={12} md={6}>
                   <Card shadow={false} bordered css={defaultCardStyle}>
                     <canvas
                       id="quote-canvas"
@@ -202,10 +205,10 @@ const HomePage: NextPage = () => {
                     ></canvas>
                   </Card>
                 </Grid>
-                <Grid xs={12} lg={6}>
+                <Grid xs={12} md={6}>
                   <Card shadow={false} bordered css={defaultCardStyle}>
                     <Text h3>{homeLabels.sidebarTitle}</Text>
-                    <Spacer y={2} />
+                    <Spacer y={1} />
 
                     <Text h4>{homeLabels.sidebarLayout}</Text>
                     <Spacer y={1} />
@@ -236,22 +239,18 @@ const HomePage: NextPage = () => {
                         onClick={() =>
                           setFormData({ ...formData, backgroundType: quoteBackgroundTypes.COLOR })
                         }
-                        css={{
-                          fontWeight:
-                            formData.backgroundType == quoteBackgroundTypes.COLOR
-                              ? 'bold'
-                              : 'normal',
-                        }}
+                        css={checkActiveBackground(
+                          formData.backgroundType,
+                          quoteBackgroundTypes.COLOR
+                        )}
                       >
                         Color
                       </Button>
                       <Button
-                        css={{
-                          fontWeight:
-                            formData.backgroundType == quoteBackgroundTypes.CUSTOM_IMAGE
-                              ? 'bold'
-                              : 'normal',
-                        }}
+                        css={checkActiveBackground(
+                          formData.backgroundType,
+                          quoteBackgroundTypes.CUSTOM_IMAGE
+                        )}
                         onClick={() =>
                           setFormData({
                             ...formData,
@@ -262,12 +261,10 @@ const HomePage: NextPage = () => {
                         Custom Image
                       </Button>
                       <Button
-                        css={{
-                          fontWeight:
-                            formData.backgroundType == quoteBackgroundTypes.RANDOM_IMAGE
-                              ? 'bold'
-                              : 'normal',
-                        }}
+                        css={checkActiveBackground(
+                          formData.backgroundType,
+                          quoteBackgroundTypes.RANDOM_IMAGE
+                        )}
                         onClick={() =>
                           setFormData({
                             ...formData,
